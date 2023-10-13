@@ -359,6 +359,58 @@ const LeftSide = () => {
                             </li>
 
                             <li
+                                className={`${activeMenu === `showHomeFeature` ||
+                                    activeMenu === `addHomeFeature` ||
+                                    activeMenu === `editHomeFeature`
+                                    ? "mm-active"
+                                    : ""
+                                    }`}
+                                onClick={() => {
+                                    Navigate("/showHomeFeature");
+                                }}
+                            >
+                                <a
+                                    className={`${activeMenu === `showHomeFeature` ||
+                                        activeMenu === `addHomeFeature` ||
+                                        activeMenu === `editHomeFeature`
+                                        ? "active"
+                                        : ""
+                                        } waves-effect`}
+                                >
+                                    <i className="uil-book-alt">
+                                        <i className="fas fa-file-alt"></i>
+                                    </i>
+                                    <span>Home Features</span>
+                                </a>
+                            </li>
+
+                            <li
+                                className={`${activeMenu === `showSpecification` ||
+                                    activeMenu === `addSpecification` ||
+                                    activeMenu === `editSpecification`
+                                    ? "mm-active"
+                                    : ""
+                                    }`}
+                                onClick={() => {
+                                    Navigate("/showSpecification");
+                                }}
+                            >
+                                <a
+                                    className={`${activeMenu === `showSpecification` ||
+                                        activeMenu === `addSpecification` ||
+                                        activeMenu === `editSpecification`
+                                        ? "active"
+                                        : ""
+                                        } waves-effect`}
+                                >
+                                    <i className="uil-book-alt">
+                                        <i className="fas fa-th-list"></i>
+                                    </i>
+                                    <span>Specification</span>
+                                </a>
+                            </li>
+
+                            <li
                                 className={`${activeMenu === `showCategory` ||
                                     activeMenu === `addCategory` ||
                                     activeMenu === `editCategory`

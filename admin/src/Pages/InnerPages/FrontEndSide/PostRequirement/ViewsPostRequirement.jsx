@@ -1,11 +1,22 @@
 import React, { useState } from 'react'
+import Modal from "react-modal";
+import ImageModel from '../../../../Components/ImageComp/ImageModel';
 
 const ViewsPostRequirement = ({ handleCloseModal, selectedForm }) => {
 
-    console.log(selectedForm, "form")
+
     const [imagePreviews, setImagePreviews] = useState(
         selectedForm?.Requirement_Images?.map((image) => image) || []
     );
+
+    // for big image
+    const [selectedImage, setSelectedImage] = useState("");
+    const [isModalOpenforImage, setIsModalOpenforImage] = useState(false);
+
+    const handleImageClick = (imageURL) => {
+        setSelectedImage(imageURL);
+        setIsModalOpenforImage(true);
+    };
 
 
     return (
@@ -127,6 +138,7 @@ const ViewsPostRequirement = ({ handleCloseModal, selectedForm }) => {
                                                         style={{ marginTop: "5px", marginLeft: "15px" }}
                                                         height={150}
                                                         width={150}
+                                                        onClick={() => handleImageClick(preview)}
                                                     />
                                                 ))}
                                             </div>
@@ -138,6 +150,19 @@ const ViewsPostRequirement = ({ handleCloseModal, selectedForm }) => {
                     </div>
                 </div>
             </div>
+
+            <Modal
+                className="main-content dark"
+                isOpen={isModalOpenforImage}
+            >
+
+                <ImageModel
+                    isOpen={isModalOpenforImage}
+                    onClose={() => setIsModalOpenforImage(false)}
+                    imageURL={selectedImage}
+                />
+            </Modal>
+
         </>
     )
 }

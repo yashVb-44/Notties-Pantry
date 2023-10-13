@@ -8,9 +8,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
 import Swal from "sweetalert2";
+import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { TextField } from '@mui/material'
+import ViewsWallet from "./ViewWallet";
 
 
 let url = process.env.REACT_APP_API_URL
@@ -29,6 +31,22 @@ const ShowWalletHistory = () => {
     const [endDateFilter, setEndDateFilter] = useState('');
 
     const Navigate = useNavigate()
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedWallet, setselectedWallet] = useState()
+
+    useEffect(() => {
+        Modal.setAppElement(document.body);
+    }, []);
+
+    const handleOpenModal = (data) => {
+        setselectedWallet(data)
+        setIsModalOpen(true);
+    };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
 
     const localeText = {
         noRowsLabel: "No Data Found 😔",
@@ -117,7 +135,7 @@ const ShowWalletHistory = () => {
         {
             field: "action",
             headerName: "Action",
-            width: 60,
+            width: 120,
             renderCell: (params) => (
                 <Stack direction="row">
                     <IconButton
@@ -126,12 +144,12 @@ const ShowWalletHistory = () => {
                     >
                         <i class="fas fa-trash-alt font-size-16 font-Icon-Del"></i>
                     </IconButton>
-                    {/* <IconButton
-                        aria-label="update"
-                        onClick={() => handleWalletUpdate(params.row._id)}
+                    <IconButton
+                        aria-label="view"
+                        onClick={() => handleOpenModal(params.row)}
                     >
-                        <i class="fas fa-pencil-alt font-size-16 font-Icon-Up"></i>
-                    </IconButton> */}
+                        <i className="fas fa-eye font-Icon-view" />
+                    </IconButton>
                 </Stack>
             ),
             filterable: false,
@@ -299,102 +317,116 @@ const ShowWalletHistory = () => {
     };
 
     return (
-        <div className="main-content">
-            <div className="page-content">
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col-2 table-heading">
-                            Wallet History
-                        </div>
-                        <div className="d-flex flex-wrap gap-2 mt-2">
-
-                            <button onClick={() => Navigate("/addWallet")} className="btn btn-primary waves-effect waves-light">
-                                Add Wallet <i className="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
-                        <div className="searchContainer mb-3">
-                            <div className="searchBarcontainer">
-                                <input
-                                    type="text"
-                                    placeholder="Search"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="searchBar"
-                                />
-                                <ClearIcon className="cancelSearch" onClick={() => setSearchQuery("")} />
+        <>
+            <div className="main-content">
+                <div className="page-content">
+                    <div className="container-fluid">
+                        <div className="row">
+                            <div className="col-2 table-heading">
+                                Wallet History
                             </div>
-                        </div>
-                        <div className="col-12">
-                            {/* <div className="card"> */}
+                            <div className="d-flex flex-wrap gap-2 mt-2">
 
-                            <TextField
-                                label='Start Date'
-                                type='date'
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: '5px', width: "135px" }}
-                                value={startDateFilter}
-                                onChange={(e) => setStartDateFilter(e.target.value)}
-                            />
-                            <TextField
-                                label='End Date'
-                                type='date'
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: '5px', width: "135px" }}
-                                value={endDateFilter}
-                                onChange={(e) => setEndDateFilter(e.target.value)}
-                            />
-                            <a className="btn btn-danger waves-effect waves-light" style={{ margin: '12px' }} onClick={() => handleClearFilters()}>
-                                Clear Filters
-                            </a>
-
-
-                            <div className="datagrid-container">
-                                <DataGrid
-                                    style={{ textTransform: "capitalize" }}
-                                    rows={handleFilter()}
-                                    columns={columns}
-                                    checkboxSelection
-                                    disableSelectionOnClick
-                                    getRowId={getRowId}
-                                    filterPanelDefaultOpen
-                                    filterPanelPosition="top"
-                                    slots={{
-                                        toolbar: (props) => (
-                                            <div>
-                                                <GridToolbar />
-                                            </div>
-                                        ),
-                                    }}
-                                    localeText={localeText}
-                                    loading={isLoading}
-                                    onCellClick={handleCellClick}
-                                    onRowSelectionModelChange={(e) => setSelectedRows(e)}
-                                    initialState={{
-                                        pagination: { paginationModel: { pageSize: 10 } },
-                                    }}
-                                    pageSizeOptions={[10, 25, 50, 100]}
-                                />
-                                {selectedRows.length > 0 && (
-                                    <div className="row-data">
-                                        <div>{selectedRows.length} Categories selected</div>
-                                        <DeleteIcon
-                                            style={{ color: "red" }}
-                                            className="cursor-pointer"
-                                            onClick={() => handleMultipleWalletDelete()}
-                                        />
-                                    </div>
-                                )}
+                                <button onClick={() => Navigate("/addWallet")} className="btn btn-primary waves-effect waves-light">
+                                    Add Wallet <i className="fas fa-arrow-right ms-2"></i>
+                                </button>
                             </div>
-                            {/* </div> */}
+                            <div className="searchContainer mb-3">
+                                <div className="searchBarcontainer">
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="searchBar"
+                                    />
+                                    <ClearIcon className="cancelSearch" onClick={() => setSearchQuery("")} />
+                                </div>
+                            </div>
+                            <div className="col-12">
+                                {/* <div className="card"> */}
+
+                                <TextField
+                                    label='Start Date'
+                                    type='date'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    style={{ margin: '5px', width: "135px" }}
+                                    value={startDateFilter}
+                                    onChange={(e) => setStartDateFilter(e.target.value)}
+                                />
+                                <TextField
+                                    label='End Date'
+                                    type='date'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    style={{ margin: '5px', width: "135px" }}
+                                    value={endDateFilter}
+                                    onChange={(e) => setEndDateFilter(e.target.value)}
+                                />
+                                <a className="btn btn-danger waves-effect waves-light" style={{ margin: '12px' }} onClick={() => handleClearFilters()}>
+                                    Clear Filters
+                                </a>
+
+
+                                <div className="datagrid-container">
+                                    <DataGrid
+                                        style={{ textTransform: "capitalize" }}
+                                        rows={handleFilter()}
+                                        columns={columns}
+                                        checkboxSelection
+                                        disableSelectionOnClick
+                                        getRowId={getRowId}
+                                        filterPanelDefaultOpen
+                                        filterPanelPosition="top"
+                                        slots={{
+                                            toolbar: (props) => (
+                                                <div>
+                                                    <GridToolbar />
+                                                </div>
+                                            ),
+                                        }}
+                                        localeText={localeText}
+                                        loading={isLoading}
+                                        onCellClick={handleCellClick}
+                                        onRowSelectionModelChange={(e) => setSelectedRows(e)}
+                                        initialState={{
+                                            pagination: { paginationModel: { pageSize: 10 } },
+                                        }}
+                                        pageSizeOptions={[10, 25, 50, 100]}
+                                    />
+                                    {selectedRows.length > 0 && (
+                                        <div className="row-data">
+                                            <div>{selectedRows.length} Categories selected</div>
+                                            <DeleteIcon
+                                                style={{ color: "red" }}
+                                                className="cursor-pointer"
+                                                onClick={() => handleMultipleWalletDelete()}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                {/* </div> */}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <Modal
+                className="main-content dark"
+                isOpen={isModalOpen}
+                onRequestClose={handleCloseModal}
+            >
+                <ViewsWallet
+                    handleCloseModal={handleCloseModal}
+                    selectedWallet={selectedWallet}
+                />
+            </Modal>
+
+        </>
     );
 };
 

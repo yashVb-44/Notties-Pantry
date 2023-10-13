@@ -455,9 +455,6 @@ route.get('/mob/get/features/productlist', async (req, res) => {
                 Product_Image: `http://${process.env.IP_ADDRESS}:${process.env.PORT}/${product?.Product_Image?.path?.replace(/\\/g, '/')}`,
                 Category: product.Category?.categoryName,
                 categoryId: product.Category?._id,
-                // Brand_Name: product?.Brand_Name?.Data_Name,
-                // Fabric_Type: product?.Fabric_Type?.Data_Name,
-                // Occasions: product?.Occasions?.Data_Name,
 
                 Product_Dis_Price: (user?.User_Type === '0' || userId === "0"
                     ? (product.Product_Dis_Price)

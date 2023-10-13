@@ -231,6 +231,4 @@ route.get('/products/get/byfeatures', async (req, res) => {
 });
 
 
-
 module.exports = route
-

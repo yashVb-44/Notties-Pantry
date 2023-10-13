@@ -43,6 +43,14 @@ const ShowOrder = () => {
             field: "orderId",
             width: 140,
             headerName: "Id",
+            renderCell: (params) => (
+                <h6
+                    onClick={() => handleOrderUpdate(params.row._id, params.row.Track_id)}
+                    style={{ cursor: "pointer" }}
+                >
+                    {params?.row?.orderId}
+                </h6>
+            )
         },
         {
             field: "PaymentId",

@@ -166,7 +166,8 @@ route.get('/profile/get', authMiddleWare, async (req, res) => {
                 Coins: user?.Coins,
                 User_Type: user?.User_Type || "",
                 Block: user?.Block,
-                isAbleWallet: user?.isAbleWallet
+                isAbleWallet: user?.isAbleWallet,
+                Referral: user?.Referral || ""
             };
             res.status(200).json({ type: "success", message: "User found successfully!", user: result || [] })
         }

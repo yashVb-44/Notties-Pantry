@@ -350,9 +350,186 @@ route.get('/get/filterList', async (req, res) => {
 //     }
 // });
 
+// route.get('/filter/get/products', async (req, res) => {
+//     try {
+//         const { categoryId, subcategoryId, rate, page = "1", limit = 20, userId, sortBy } = req.query;
+
+//         let user;
+//         if (userId !== "0") {
+//             user = await User.findById(userId);
+//         }
+
+//         const filters = {};
+
+//         if (categoryId) {
+//             filters['Category'] = categoryId;
+//         }
+
+
+//         if (subcategoryId) {
+//             const subCategoryNamesArray = subcategoryId.split(',');
+//             const regexSubCategoryNames = subCategoryNamesArray.map(name => new RegExp(name, 'i'));
+//             const SubCategoryObjectIds = await SubCategory.find({ subCategoryName: { $in: regexSubCategoryNames } }).distinct('_id');
+//             filters['Sub_Category'] = { $in: SubCategoryObjectIds };
+//         }
+
+//         let products = await Product.find(filters)
+//             .populate('Variation')
+//             .populate('Sub_Category')
+//             .populate('Category')
+//             .skip((page - 1) * limit)
+//             .limit(limit)
+//             .lean();
+
+
+//         if (rate) {
+
+//             const rateRanges = {
+//                 'below 999': { $gte: 0, $lte: 999 },
+//                 '1000-1500': { $gte: 1000, $lte: 1500 },
+//                 '1500-2500': { $gte: 1500, $lte: 2500 },
+//                 '2500 onwards': { $gte: 2500, $lte: 100000000000000 }
+//             };
+
+//             products = products.filter(product => {
+//                 const variation = product?.Variation[0];
+//                 const size = variation?.Variation_Size[0];
+//                 // const price = size?.R0_Price;
+
+//                 let price = 0
+//                 if (user?.User_Type === '0' || userId === "0") {
+//                     price = size?.R0_Price
+//                 }
+//                 else if (user?.User_Type === '1') {
+//                     price = size?.R1_Price
+//                 }
+//                 else if (user?.User_Type === '2') {
+//                     price = size?.R2_Price
+//                 }
+//                 else if (user?.User_Type === '3') {
+//                     price = size?.R3_Price
+//                 }
+//                 else if (user?.User_Type === '4') {
+//                     price = size?.R4_Price
+//                 }
+
+//                 return price && price >= rateRanges[rate].$gte && price <= rateRanges[rate].$lte;
+//             });
+
+//         }
+
+//         const userWishlist = await getWishList(userId);
+
+//         let sortOption = {};
+
+//         switch (sortBy) {
+//             case 'price-low-to-high':
+//                 sortOption = { 'Product_Dis_Price': 1 };
+//                 break;
+//             case 'price-high-to-low':
+//                 sortOption = { 'Product_Dis_Price': -1 };
+//                 break;
+//             case 'new-arrival':
+//                 sortOption = { 'createdAt': -1 };
+//                 break;
+//             default:
+//                 sortOption = {}; // Default sort
+//         }
+
+//         products = products.sort((a, b) => a.Product_Dis_Price - b.Product_Dis_Price);
+
+//         // const products = await Product.find(filters)
+//         //     .populate('Variation')
+//         //     .populate('Sub_Category')
+//         //     .populate('Category')
+//         //     .sort(sortOptions[sortBy] || sortOptions['relevance'])
+//         //     .skip((page - 1) * limit)
+//         //     .limit(limit)
+//         //     .lean();
+
+
+//         if (products.length <= 0) {
+//             return res.status(200).json({ type: 'success', message: 'Products not found!', products: [] });
+//         } else {
+//             const result = products.map(product => {
+//                 const variation = product?.Variation[0];
+//                 const size = variation?.Variation_Size[0];
+//                 let price;
+
+//                 if (user?.User_Type === '0' || userId === "0") {
+//                     price = size?.R0_Price;
+//                 } else if (user?.User_Type === '1') {
+//                     price = size?.R1_Price;
+//                 } else if (user?.User_Type === '2') {
+//                     price = size?.R2_Price;
+//                 } else if (user?.User_Type === '3') {
+//                     price = size?.R3_Price;
+//                 } else {
+//                     price = size?.R4_Price;
+//                 }
+
+//                 return {
+//                     _id: product._id,
+//                     Product_Name: product.Product_Name,
+//                     SKU_Code: product.SKU_Code,
+//                     Product_Image: `${process.env.PORT}/${product?.Product_Image?.replace(/\\/g, '/')}`,
+//                     Category: product.Category?.categoryName,
+//                     SubCategory: product.Sub_Category?.subCategoryName,
+//                     Product_Dis_Price: price,
+//                     Product_Ori_Price: size?.Disc_Price,
+//                     Description: product.Description,
+//                     isFavorite: userWishlist.includes(product._id?.toString())
+//                 };
+//             });
+
+//             const totalProducts = await Product.countDocuments(filters);
+
+//             res.status(200).json({
+//                 type: 'success', message: 'Products found successfully!',
+//                 products: result,
+//                 currentPage: page,
+//                 totalPages: Math.ceil(totalProducts / limit)
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ type: 'error', message: 'Server Error!', errorMessage: error });
+//         console.error(error);
+//     }
+// });
+
+
+function getPriceForUser(user, product) {
+    const variation = product?.Variation[0];
+    const size = variation?.Variation_Size[0];
+
+    if (user === undefined) {
+        user = "0"
+    }
+
+    let price = 0;
+
+    if (user?.User_Type === '0' || user === "0") {
+        price = size?.R0_Price;
+    }
+    else if (user?.User_Type === '1') {
+        price = size?.R1_Price;
+    }
+    else if (user?.User_Type === '2') {
+        price = size?.R2_Price;
+    }
+    else if (user?.User_Type === '3') {
+        price = size?.R3_Price;
+    }
+    else if (user?.User_Type === '4') {
+        price = size?.R4_Price;
+    }
+
+    return price || 0;
+}
+
 route.get('/filter/get/products', async (req, res) => {
     try {
-        const { subcategoryId, rate, page = "1", limit = 20, userId, sortBy } = req.query;
+        const { categoryId, subcategoryId, rate, page = "1", limit = 20, userId, sortBy } = req.query;
 
         let user;
         if (userId !== "0") {
@@ -361,9 +538,9 @@ route.get('/filter/get/products', async (req, res) => {
 
         const filters = {};
 
-        // if (subcategoryId) {
-        //     filters['Sub_Category.subCategoryName'] = subcategoryId;
-        // }
+        if (categoryId) {
+            filters['Category'] = categoryId;
+        }
 
         if (subcategoryId) {
             const subCategoryNamesArray = subcategoryId.split(',');
@@ -372,52 +549,69 @@ route.get('/filter/get/products', async (req, res) => {
             filters['Sub_Category'] = { $in: SubCategoryObjectIds };
         }
 
-
-        if (rate) {
-            const rateRanges = {
-                'below 999': { $lte: 999 },
-                '1000-1500': { $gte: 1000, $lte: 1500 },
-                '1500-2500': { $gte: 1500, $lte: 2500 },
-                '2500 onwards': { $gte: 2500 }
-            };
-            if (user?.User_Type === '0' || userId === "0") {
-                filters['R0_Price'] = rateRanges[rate];
-            }
-            else if (user?.User_Type === '1') {
-                filters['R1_Price'] = rateRanges[rate];
-            }
-            else if (user?.User_Type === '2') {
-                filters['R2_Price'] = rateRanges[rate];
-            }
-            else if (user?.User_Type === '3') {
-                filters['R3_Price'] = rateRanges[rate];
-            }
-            else if (user?.User_Type === '4') {
-                filters['R4_Price'] = rateRanges[rate];
-            }
-        }
-
-        const userWishlist = await getWishList(userId);
-
-        const sortOptions = {
-            relevance: {}, // Default sort
-            'price-low-to-high': { 'Product_Dis_Price': 1 },
-            'price-high-to-low': { 'Product_Dis_Price': -1 },
-            'new-arrival': { 'createdAt': -1 }
-        };
-
-        const products = await Product.find(filters)
+        let products = await Product.find(filters)
             .populate('Variation')
             .populate('Sub_Category')
             .populate('Category')
-            .sort(sortOptions[sortBy] || sortOptions['relevance'])
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
 
+        if (rate) {
+            const rateRanges = {
+                'below 999': { $gte: 0, $lte: 999 },
+                '1000-1500': { $gte: 1000, $lte: 1500 },
+                '1500-2500': { $gte: 1500, $lte: 2500 },
+                '2500 onwards': { $gte: 2500, $lte: 100000000000000 }
+            };
+
+            products = products.filter(product => {
+                const variation = product?.Variation[0];
+                const size = variation?.Variation_Size[0];
+
+                let price = 0;
+                if (user?.User_Type === '0' || userId === "0") {
+                    price = size?.R0_Price;
+                }
+                else if (user?.User_Type === '1') {
+                    price = size?.R1_Price;
+                }
+                else if (user?.User_Type === '2') {
+                    price = size?.R2_Price;
+                }
+                else if (user?.User_Type === '3') {
+                    price = size?.R3_Price;
+                }
+                else if (user?.User_Type === '4') {
+                    price = size?.R4_Price;
+                }
+
+                return price && price >= rateRanges[rate].$gte && price <= rateRanges[rate].$lte;
+            });
+        }
+
+        const userWishlist = await getWishList(userId);
+
+
         if (products.length <= 0) {
             return res.status(200).json({ type: 'success', message: 'Products not found!', products: [] });
         } else {
+
+            // Sort products based on the sortBy parameter
+            if (sortBy === 'price-low-to-high') {
+                products.sort((a, b) => {
+                    const priceA = getPriceForUser(user, a);
+                    const priceB = getPriceForUser(user, b);
+                    return priceA - priceB;
+                });
+            } else if (sortBy === 'price-high-to-low') {
+                products.sort((a, b) => {
+                    const priceA = getPriceForUser(user, a);
+                    const priceB = getPriceForUser(user, b);
+                    return priceB - priceA;
+                });
+            }
+
             const result = products.map(product => {
                 const variation = product?.Variation[0];
                 const size = variation?.Variation_Size[0];
@@ -439,7 +633,7 @@ route.get('/filter/get/products', async (req, res) => {
                     _id: product._id,
                     Product_Name: product.Product_Name,
                     SKU_Code: product.SKU_Code,
-                    Product_Image: `${process.env.PORT}/${product?.Product_Image?.replace(/\\/g, '/')}`,
+                    Product_Image: `${process.env.IMAGE_URL}/${product?.Product_Image?.replace(/\\/g, '/')}`,
                     Category: product.Category?.categoryName,
                     SubCategory: product.Sub_Category?.subCategoryName,
                     Product_Dis_Price: price,
@@ -463,6 +657,103 @@ route.get('/filter/get/products', async (req, res) => {
         console.error(error);
     }
 });
+
+
+// route.get('/filter/get/products', async (req, res) => {
+//     try {
+//         const { categoryId, subcategoryId, rate, page = "1", limit = 20, userId, sortBy } = req.query;
+
+//         let user;
+//         if (userId !== "0") {
+//             user = await User.findById(userId);
+//         }
+
+//         const filters = {};
+
+//         if (categoryId) {
+//             filters['Category'] = categoryId;
+//         }
+
+//         if (subcategoryId) {
+//             const subCategoryNamesArray = subcategoryId.split(',');
+//             const regexSubCategoryNames = subCategoryNamesArray.map(name => new RegExp(name, 'i'));
+//             const SubCategoryObjectIds = await SubCategory.find({ subCategoryName: { $in: regexSubCategoryNames } }).distinct('_id');
+//             filters['Sub_Category'] = { $in: SubCategoryObjectIds };
+//         }
+
+//         const userWishlist = await getWishList(userId);
+
+//         const sortOptions = {
+//             relevance: {}, // Default sort
+//             'price-low-to-high': { 'Product_Dis_Price': 1 },
+//             'price-high-to-low': { 'Product_Dis_Price': -1 },
+//             'new-arrival': { 'createdAt': -1 }
+//         };
+
+//         let products = await Product.find(filters)
+//             .populate('Variation')
+//             .populate('Sub_Category')
+//             .populate('Category')
+//             .lean();
+
+//         if (rate) {
+//             const rateRanges = {
+//                 'below 999': { $lte: 999 },
+//                 '1000-1500': { $gte: 1000, $lte: 1500 },
+//                 '1500-2500': { $gte: 1500, $lte: 2500 },
+//                 '2500 onwards': { $gte: 2500 }
+//             };
+//             products = products.filter(product => {
+//                 const variation = product?.Variation[0];
+//                 const size = variation?.Variation_Size[0];
+//                 const price = size?.R0_Price;
+//                 return price && price >= rateRanges[rate].$gte && price <= rateRanges[rate].$lte;
+//             });
+
+//         }
+
+//         console.log(products)
+
+//         if (products.length <= 0) {
+//             return res.status(200).json({ type: 'success', message: 'Products not found!', products: [] });
+//         } else {
+//             const result = products.map(product => {
+//                 const variation = product?.Variation[0];
+//                 const size = variation?.Variation_Size[0];
+
+//                 return {
+//                     _id: product._id,
+//                     Product_Name: product.Product_Name,
+//                     SKU_Code: product.SKU_Code,
+//                     Product_Image: `${process.env.PORT}/${product?.Product_Image?.replace(/\\/g, '/')}`,
+//                     Category: product.Category?.categoryName,
+//                     SubCategory: product.Sub_Category?.subCategoryName,
+//                     Product_Dis_Price: size.R0_Price, // Assuming the default is R0_Price
+//                     Product_Ori_Price: size?.Disc_Price,
+//                     Description: product.Description,
+//                     isFavorite: userWishlist.includes(product._id?.toString())
+//                 };
+//             });
+
+//             const totalProducts = products.length;
+
+//             res.status(200).json({
+//                 type: 'success', message: 'Products found successfully!',
+//                 products: result,
+//                 currentPage: page,
+//                 totalPages: Math.ceil(totalProducts / limit)
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ type: 'error', message: 'Server Error!', errorMessage: error });
+//         console.error(error);
+//     }
+// });
+
+
+
+
+
 
 
 

@@ -105,6 +105,6 @@ app.get("*", (req, res) => {
     res.sendFile(indexPath)
 })
 
-app.listen(port, () => {
+app.listen(1234, () => {
     console.log(`Server listening on ${ipAddress}:${port}`);
 });

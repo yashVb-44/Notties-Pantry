@@ -38,10 +38,6 @@ route.get('/mob/get/productlist/:id', async (req, res) => {
                 path: 'Variation',
                 select: '-__v',
             })
-            .populate('Brand_Name', 'Data_Name')
-            .populate('Fabric_Type', 'Data_Name')
-            .populate('Occasions', 'Data_Name');
-
         SimilarProducts = SimilarProducts?.filter((product) => product?._id?.toString() !== productId)
 
         let YouMayAlsoLike = await Product.find({ Product_Status: true })
@@ -51,10 +47,6 @@ route.get('/mob/get/productlist/:id', async (req, res) => {
                 path: 'Variation',
                 select: '-__v',
             })
-            .populate('Brand_Name', 'Data_Name')
-            .populate('Fabric_Type', 'Data_Name')
-            .populate('Occasions', 'Data_Name');
-
         YouMayAlsoLike = YouMayAlsoLike?.filter((product) => product?._id?.toString() !== productId)
 
         let ResultSimilarProducts = []
